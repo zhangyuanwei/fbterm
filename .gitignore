@@ -26,3 +26,12 @@
 *.exe
 *.out
 *.app
+
+# From SVN
+config.log
+config.status
+stamp-h1
+config.h
+Makefile
+autom4te.cache
+*.deps

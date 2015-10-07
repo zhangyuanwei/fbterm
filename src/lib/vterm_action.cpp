@@ -446,6 +446,7 @@ void VTerm::enable_mode(bool enable)
 		modeChanged(MouseReport);
 		break;
 	default:
+//        printf("%s_mode param[0]:%d q_mode:%d\n", enable ? "enable" : "disable", param[0], q_mode);
 		break;
 	}
 }
@@ -462,6 +463,13 @@ void VTerm::clear_mode()
 
 void VTerm::set_display_attr()
 {
+    /*
+    printf("\\e[");
+	for (u16 n = 0; n <= npar; n++) {
+        printf("%d;", param[n]);
+    }
+    printf("m\n");
+    //*/
 	for (u16 n = 0; n <= npar; n++) {
 		switch (param[n]) {
 		case 0:
@@ -480,11 +488,22 @@ void VTerm::set_display_attr()
 			char_attr.underline = true;
 			break;
 		case 5:
+            //Blink: Slow
 			char_attr.blink = true;
 			break;
+        case 6:
+            //Blink: Rapid
+			char_attr.blink = true;
+            break;
 		case 7:
 			char_attr.reverse = true;
 			break;
+        case 8:
+            //Conceal
+            break;
+        case 9:
+            //Crossed-out
+            break;
 		case 10:
 			charset = (g0_is_active ? g0_charset : g1_charset);
 			mode_flags.display_ctrl = false;
@@ -500,6 +519,12 @@ void VTerm::set_display_attr()
 			mode_flags.display_ctrl = true;
 			mode_flags.toggle_meta = true;
 			break;
+        case 13 ... 19:
+            //n-th alternate font
+            break;
+        case 20:
+            //Fraktur
+            break;
 		case 21:
 		case 22:
 			char_attr.intensity = 1;
@@ -513,25 +538,41 @@ void VTerm::set_display_attr()
 		case 25:
 			char_attr.blink = false;
 			break;
+        case 26:
+            //Reserved
+            break;
 		case 27:
 			char_attr.reverse = false;
 			break;
+        case 28:
+            //Reveal
+            break;
+        case 29:
+            //Not crossed out
+            break;
 		case 30 ... 37:
 			char_attr.fcolor = param[n] % 10;
 			break;
 		case 38:
-			char_attr.fcolor = cur_fcolor;
-			char_attr.underline = true;
+            if(n + 2 <= npar && (param[n + 1] == 5)){
+			    char_attr.fcolor = param[n + 2];
+                n += 2;
+            }
 			break;
 		case 39:
-			char_attr.fcolor = cur_fcolor;
-			char_attr.underline = false;
+			char_attr.fcolor = default_char_attr.fcolor;
 			break;
 		case 40 ... 47:
 			char_attr.bcolor = param[n] % 10;
 			break;
+        case 48:
+            if(n + 2 <= npar && (param[n + 1] == 5)){
+			    char_attr.bcolor = param[n + 2];
+                n += 2;
+            }
+            break;
 		case 49:
-			char_attr.bcolor = cur_bcolor;
+			char_attr.bcolor = default_char_attr.bcolor;
 			break;
 		default :
 			break;
@@ -683,7 +724,16 @@ void VTerm::set_led()
 
 void VTerm::fbterm_specific()
 {
+    //printf("\\e[");
+	//for (u16 n = 0; n <= npar; n++) {
+    //    printf("%d;", param[n]);
+    //}
+    //printf("}\n");
 	switch (param[0]) {
+    case 0:
+	    char_attr = default_char_attr;
+        break;
+
 	case 1:
 		if (npar == 1) char_attr.fcolor = param[1];
 		break;

@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include "vterm.h"
+//#include <stdio.h>
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -68,6 +69,7 @@ u8 VTerm::control_map[MAX_CONTROL_CODE], VTerm::escape_map[NR_STATES][MAX_ESCAPE
 
 void VTerm::init_state()
 {
+    //printf("VTerm::init_state\n");
 	for (u8 i = 1; control_sequences[i].code != (u16)-1; i++) {
 		control_map[control_sequences[i].code] = i;
 	}
@@ -290,6 +292,14 @@ void VTerm::input(const u8 *buf, u32 count)
 		changed_line(cursor_y, cursor_x, cursor_x);
 	}
 
+    /*
+    u32 i;
+    printf("VTerm::input:");
+    for(i=0;i<count;i++){
+        printf("%c", buf[i]);
+    }
+    printf("\n");
+    //*/
 	u32 c, tc;
 	bool rescan;
 
@@ -416,6 +426,7 @@ void VTerm::input(const u8 *buf, u32 count)
 
 void VTerm::do_normal_char()
 {
+    //printf("VTerm::do_normal_char\n");
 	if (cur_char > 0xffff) cur_char = 0xfffd;
 
 	s32 cw = charWidth(cur_char);
@@ -456,6 +467,21 @@ void VTerm::do_normal_char()
 	text[yp + cursor_x] = cur_char;
 	attrs[yp + cursor_x] = normal_char_attr();
 
+    /*
+    CharAttr *att = &(attrs[yp + cursor_x]);
+    printf("[fc:%d bc:%d in:%d it:%d un:%d bl:%d re:%d tp:%d]%c\n",
+		att->fcolor,
+		att->bcolor,
+		att->intensity,
+		att->italic,
+		att->underline,
+		att->blink,
+		att->reverse,
+		att->type,
+        cur_char
+    );
+    //*/
+
 	if (dw) {
 		attrs[yp + cursor_x++].type = CharAttr::DoubleLeft;
 
@@ -469,6 +495,7 @@ void VTerm::do_normal_char()
 
 void VTerm::do_control_char()
 {
+    //printf("VTerm::do_control_char\n");
 	u8 index = (cur_char < MAX_CONTROL_CODE ? control_map[cur_char] : 0);
 	const Sequence *seq = control_sequences + index;
 
@@ -482,6 +509,7 @@ void VTerm::do_control_char()
 
 void VTerm::update()
 {
+    //printf("VTerm::update\n");
 	if (!width) return;
 
 	// first perform scroll-copy

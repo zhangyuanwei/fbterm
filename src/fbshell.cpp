@@ -322,11 +322,11 @@ u8 VTerm::init_default_color(bool foreground)
 	if (foreground) {
 		color = 7;
 		Config::instance()->getOption("color-foreground", color);
-		if (color > 7) color = 7;
+		//if (color > 15) color = 7;
 	} else {
 		color = 0;
 		Config::instance()->getOption("color-background", color);
-		if (color > 7) color = 0;
+		//if (color > 15) color = 0;
 	}
 
 	return color;
@@ -696,19 +696,28 @@ void FbShell::expose(u16 x, u16 y, u16 w, u16 h)
 
 void FbShell::adjustCharAttr(CharAttr &attr)
 {
-	if (attr.italic) attr.fcolor = 2; // green
-	else if (attr.underline) attr.fcolor = 6; // cyan
-	else if (attr.intensity == 0) attr.fcolor = 8; // gray
+	//if (attr.italic) attr.fcolor = 2; // green
+	//else if (attr.underline) attr.fcolor = 6; // cyan
+	//else if (attr.intensity == 0) attr.fcolor = 8; // gray
 
-	if (attr.blink && attr.bcolor < 8) attr.bcolor ^= 8;
-	if (attr.intensity == 2 && attr.fcolor < 8) attr.fcolor ^= 8;
+	//if (attr.blink && attr.bcolor < 8) attr.bcolor ^= 8;
+	//if (attr.intensity == 2 && attr.fcolor < 8) attr.fcolor ^= 8;
+	//fc fcolor,
+	//bc bcolor,
+	//in intensity,
+	//it italic,
+	//un underline,
+	//bl blink,
+	//re reverse,
+	//tp type,
 
+	if (attr.intensity == 2 && attr.fcolor < 8) attr.fcolor += 8;
+    
 	if (attr.reverse) {
 		u16 temp = attr.bcolor;
 		attr.bcolor = attr.fcolor;
 		attr.fcolor = temp;
-
-		if (attr.bcolor > 8 && attr.bcolor < 16) attr.bcolor -= 8;
+        if (attr.bcolor >= 8 && attr.bcolor < 16) attr.bcolor -= 8;
 	}
 }
 
